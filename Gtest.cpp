@@ -50,6 +50,29 @@ TEST(AddPurchase, Transaction) {
     ASSERT_EQ(core.mUserBalance[userId[2]].rub, 1880);
 }
 
+TEST(AddPurchase, Balance) {
+    static Core core;
+    std::vector userId = {core.RegisterNewUser("Alice", 101),
+                          core.RegisterNewUser("Bob", 102),
+                          core.RegisterNewUser("Sam", 103)};
+
+    auto index = core.CreateOrder(userId[0], 10, 62, false);
+    core.AddPurchase(index);
+    index = core.CreateOrder(userId[1], 20, 63, false);
+    core.AddPurchase(index);
+    index = core.CreateOrder(userId[2], 50, 61, true);
+    core.AddSell(index);
+
+    auto res =core.GetUserBalance(userId[0]);
+    ASSERT_EQ(res.toString(), "Balance: -620 RUB, 10 USD.\n");
+    res = core.GetUserBalance(userId[1]);
+    ASSERT_EQ(res.toString(), "Balance: -1260 RUB, 20 USD.\n");
+    res = core.GetUserBalance(userId[2]);
+    ASSERT_EQ(res.toString(), "Balance: 1880 RUB, -30 USD.\n");
+    auto quotes = core.GetQuotes();
+    ASSERT_EQ(quotes, "63 62\n");
+}
+
 TEST(AddPurchase, Cansel) {
     static Core core;
     auto userId = core.RegisterNewUser("Alice", 101);

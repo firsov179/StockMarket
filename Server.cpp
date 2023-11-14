@@ -76,11 +76,7 @@ public:
                 int index = std::stoi(static_cast<const std::string &>(j["Index"]));
                 reply = GetCore().Cansel(userId, index);
             } else if (reqType == Requests::Quotes) {
-                reply = "";
-                for (auto item: GetCore().quotes) {
-                    reply += " " + std::to_string(item);
-                }
-                reply += "\n";
+                reply = GetCore().GetQuotes();
             } else if (reqType == Requests::AddOrder) {
                 unsigned int quantity = std::stoi(static_cast<const std::string &>(j["Quantity"]));
                 int cost = std::stoi(static_cast<const std::string &>(j["Cost"]));

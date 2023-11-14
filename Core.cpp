@@ -165,3 +165,14 @@ std::string Core::Cansel(unsigned long userId, int index) {
     return "There is no ad with this number!\n";
 }
 
+std::string Core::GetQuotes() {
+    std::string res = "";
+    for (auto item: quotes) {
+        if (!res.empty()) {
+            res += ' ';
+        }
+        res += std::to_string(item);
+    }
+    return res + "\n";
+}
+

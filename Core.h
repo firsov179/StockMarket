@@ -42,6 +42,8 @@ public:
 
     std::string Cansel(unsigned long userId, int index);
 
+    std::string GetQuotes();
+
 private:
     struct sellCmp {
         bool operator()(const size_t a, const size_t b) const;
@@ -69,4 +71,5 @@ private:
     FRIEND_TEST(AddPurchase, SimpleAddition);
     FRIEND_TEST(AddPurchase, Transaction);
     FRIEND_TEST(AddPurchase, Cansel);
+    FRIEND_TEST(AddPurchase, Balance);
 };
