@@ -3,21 +3,21 @@
 
 #include "Core.h"
 
-TEST(AddPurchase, simple) {
+TEST(AddPurchase, SimpleAddition) {
     static Core core;
     std::vector userId = {core.RegisterNewUser("Alice", 101),
-                   core.RegisterNewUser("Bob", 102),
-                   core.RegisterNewUser("Sam", 103)};
+                          core.RegisterNewUser("Bob", 102),
+                          core.RegisterNewUser("Sam", 103)};
     std::vector cost = {80, 70, 75, 82, 30};
     for (int i = 0; i < 5; ++i) {
-        auto index = core.CreateOrder(userId[i % 3], 10 * (i + 1), cost[i]);
+        auto index = core.CreateOrder(userId[i % 3], 10 * (i + 1), cost[i], false);
         core.AddPurchase(index);
     }
     ASSERT_EQ(core.mSalesOrder.size(), 0);
     ASSERT_EQ(core.mPurchasesOrder.size(), 5);
     cost = {82, 80, 75, 70, 30};
     int i = 0;
-    for (auto& item : core.mPurchasesOrder) {
+    for (auto &item: core.mPurchasesOrder) {
         ASSERT_EQ(cost[i], core.orders[item].cost);
         i++;
     }
@@ -30,11 +30,11 @@ TEST(AddPurchase, Transaction) {
                           core.RegisterNewUser("Bob", 102),
                           core.RegisterNewUser("Sam", 103)};
 
-    auto index = core.CreateOrder(userId[0], 10 , 62);
+    auto index = core.CreateOrder(userId[0], 10, 62, false);
     core.AddPurchase(index);
-    index = core.CreateOrder(userId[1], 20 , 63);
+    index = core.CreateOrder(userId[1], 20, 63, false);
     core.AddPurchase(index);
-    index = core.CreateOrder(userId[2], 50 , 61);
+    index = core.CreateOrder(userId[2], 50, 61, true);
     core.AddSell(index);
 
     ASSERT_EQ(core.mPurchasesOrder.size(), 0);
@@ -48,6 +48,31 @@ TEST(AddPurchase, Transaction) {
     ASSERT_EQ(core.mUserBalance[userId[0]].rub, -620);
     ASSERT_EQ(core.mUserBalance[userId[1]].rub, -1260);
     ASSERT_EQ(core.mUserBalance[userId[2]].rub, 1880);
+}
+
+TEST(AddPurchase, Cansel) {
+    static Core core;
+    auto userId = core.RegisterNewUser("Alice", 101);
+
+    auto index1 = core.CreateOrder(userId, 1, 10, false);
+    core.AddPurchase(index1);
+    auto index2 = core.CreateOrder(userId, 1, 100, true);
+    core.AddSell(index2);
+
+    auto res = core.GetUserList(userId);
+
+    std::string rhs = (boost::format("{\n1. Purchase: Quantity: 1, Cost: 10, Creation time: %1%2. Sell: Quantity: 1, Cost: 100, Creation time: %2%}\n")
+            % std::asctime(std::localtime(&core.orders[index1].creationTime))
+            % std::asctime(std::localtime(&core.orders[index1].creationTime))).str();
+    ASSERT_EQ(res, rhs);
+
+    res = core.Cansel(userId, 1);
+    ASSERT_EQ(res, "Ok!\n");
+    res = core.GetUserList(userId);
+    rhs = (boost::format("{\n1. Sell: Quantity: 1, Cost: 100, Creation time: %1%}\n")
+           % std::asctime(std::localtime(&core.orders[index1].creationTime))).str();
+    ASSERT_EQ(res, rhs);
+
 }
 
 std::vector<Order> Core::orders = {};

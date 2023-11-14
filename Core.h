@@ -37,8 +37,11 @@ public:
 
     std::string GetUserList(unsigned long i);
 
-    size_t CreateOrder(unsigned long UserId, unsigned int quantity, int cost);
+    size_t CreateOrder(unsigned long userId, unsigned int quantity, int cost, bool isSale);
     static std::vector<Order> orders;
+
+    std::string Cansel(unsigned long userId, int index);
+
 private:
     struct sellCmp {
         bool operator()(const size_t a, const size_t b) const;
@@ -48,12 +51,13 @@ private:
         bool operator()(const size_t a, const size_t b) const;
     };
 
-    // <UserId, <UserName, password hash>>
+    // <userId, <UserName, password hash>>
     std::unordered_map<unsigned long, std::pair<std::string, long>> mUsers;
-    // <UserName, UserId>
+    // <UserName, userId>
     std::unordered_map<std::string, unsigned long> allUsers;
+    std::unordered_map<unsigned long, std::vector<size_t>> usersOrders;
 
-    // <UserId, <USD, RUB>>
+    // <userId, <USD, RUB>>
     std::unordered_map<unsigned long, Balance> mUserBalance;
 
     void transaction(unsigned long sellerId, unsigned long buyerId,
@@ -62,8 +66,7 @@ private:
     std::set<size_t, sellCmp> mSalesOrder;
     std::set<size_t, purchCmp> mPurchasesOrder;
 
-    FRIEND_TEST(AddPurchase, simple);
+    FRIEND_TEST(AddPurchase, SimpleAddition);
     FRIEND_TEST(AddPurchase, Transaction);
-
-
+    FRIEND_TEST(AddPurchase, Cansel);
 };

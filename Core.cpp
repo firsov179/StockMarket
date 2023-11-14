@@ -8,6 +8,7 @@ unsigned long Core::RegisterNewUser(const std::string &aUserName, long aUserPass
     unsigned long newUserId = mUsers.size() + 1;
     allUsers[aUserName] = newUserId;
     alerts[newUserId] = {};
+    usersOrders[newUserId] = {};
     mUsers[newUserId] = {aUserName, aUserPasswordHash};
     mUserBalance[newUserId] = Balance();
     return newUserId;
@@ -51,22 +52,17 @@ void Core::AddSell(size_t sellOrder) {
     while (!mPurchasesOrder.empty() && orders[sellOrder].quantity != 0 &&
            orders[*mPurchasesOrder.begin()].cost >= orders[sellOrder].cost) {
         if (orders[sellOrder].quantity < orders[*mPurchasesOrder.begin()].quantity) {
-            Order updated(orders[*mPurchasesOrder.begin()]);
-            updated.quantity -= orders[sellOrder].quantity;
+            orders[*mPurchasesOrder.begin()].quantity -= orders[sellOrder].quantity;
 
-            transaction(orders[sellOrder].userId, updated.userId, updated.cost,
-                        orders[sellOrder].quantity);
+            transaction(orders[sellOrder].userId, orders[*mPurchasesOrder.begin()].userId,
+                        orders[*mPurchasesOrder.begin()].cost,orders[sellOrder].quantity);
 
             orders[sellOrder].quantity = 0;
-            orders.push_back(updated);
-            mSalesOrder.erase(mPurchasesOrder.begin());
-            mPurchasesOrder.insert(orders.size() - 1);
-
         } else {
             transaction(orders[sellOrder].userId, orders[*mPurchasesOrder.begin()].userId,
                         orders[*mPurchasesOrder.begin()].cost, orders[*mPurchasesOrder.begin()].quantity);
-
             orders[sellOrder].quantity -= orders[*mPurchasesOrder.begin()].quantity;
+            orders[*mPurchasesOrder.begin()].quantity = 0;
             mPurchasesOrder.erase(mPurchasesOrder.begin());
         }
     }
@@ -83,21 +79,18 @@ void Core::AddPurchase(size_t purchOrder) {
     while (!mPurchasesOrder.empty() && orders[purchOrder].quantity != 0 &&
            orders[*mSalesOrder.begin()].cost <= orders[purchOrder].cost) {
         if (orders[purchOrder].quantity < orders[*mSalesOrder.begin()].quantity) {
-            Order updated(orders[*mSalesOrder.begin()]);
-            updated.quantity -= orders[purchOrder].quantity;
 
-            transaction(updated.userId, orders[purchOrder].userId, orders[purchOrder].cost,
+            orders[*mSalesOrder.begin()].quantity -= orders[purchOrder].quantity;
+
+            transaction(orders[*mSalesOrder.begin()].userId, orders[purchOrder].userId, orders[purchOrder].cost,
                         orders[purchOrder].quantity);
 
             orders[purchOrder].quantity = 0;
-            orders.push_back(updated);
-            mSalesOrder.erase(mSalesOrder.begin());
-            mSalesOrder.insert(orders.size() - 1);
         } else {
             transaction(orders[*mSalesOrder.begin()].userId, orders[purchOrder].userId,
                         orders[purchOrder].cost, orders[*mSalesOrder.begin()].quantity);
-
             orders[purchOrder].quantity -= orders[*mSalesOrder.begin()].quantity;
+            orders[*mSalesOrder.begin()].quantity = 0;
             mSalesOrder.erase(mSalesOrder.begin());
         }
     }
@@ -136,14 +129,39 @@ void Core::transaction(unsigned long sellerId, unsigned long buyerId, int curCos
                                curQuantity % curCost).str());
 }
 
-std::string Core::GetUserList(unsigned long i) {
-    return "";
+std::string Core::GetUserList(unsigned long userId) {
+    std::string res = "{\n";
+    int i = 1;
+    for (auto orderId: usersOrders[userId]) {
+        if (orders[orderId].quantity != 0) {
+            res += std::to_string(i) + ". ";
+            res += orders[orderId].toString();
+            i++;
+        }
+    }
+    res += "}\n";
+    return res;
 }
 
-size_t Core::CreateOrder(unsigned long UserId, unsigned int quantity, int cost) {
-    Order curOrder(UserId, quantity, cost);
+size_t Core::CreateOrder(unsigned long userId, unsigned int quantity, int cost, bool isSale) {
+    Order curOrder(userId, quantity, cost, isSale);
     size_t orderIndex = orders.size();
     orders.push_back(curOrder);
+    usersOrders[userId].push_back(orderIndex);
     return orderIndex;
+}
+
+std::string Core::Cansel(unsigned long userId, int index) {
+    int i = 0;
+    for (auto orderId: usersOrders[userId]) {
+        if (orders[orderId].quantity != 0) {
+            i++;
+        }
+        if (i == index) {
+            orders[orderId].quantity = 0;
+            return "Ok!\n";
+        }
+    }
+    return "There is no ad with this number!\n";
 }
 

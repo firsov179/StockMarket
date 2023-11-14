@@ -15,6 +15,7 @@ namespace Requests
     static std::string Quotes = "Quo";
     static std::string Check = "Che";
     static std::string List = "Lis";
+    static std::string Cansel = "Can";
 }
 
 #endif //CLIENSERVERECN_COMMON_HPP

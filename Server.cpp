@@ -40,7 +40,7 @@ public:
             // Парсим json, который пришёл нам в сообщении.
             auto j = nlohmann::json::parse(data_);
             auto reqType = j["ReqType"];
-            unsigned long UserId = std::stol(static_cast<const std::string &>(j["UserId"]));
+            unsigned long userId = std::stol(static_cast<const std::string &>(j["userId"]));
 
             std::string reply = "Error! Unknown request typen";
             std::cout << reqType << std::endl;
@@ -52,26 +52,29 @@ public:
             } else if (reqType == Requests::Login) {
                 long passwordHash = std::stol(static_cast<const std::string &>(j["PasswordHash"]));
                 reply = std::to_string(GetCore().LoginUser(j["Name"], passwordHash));
-            } else if (!GetCore().checkUserId(UserId)) {
+            } else if (!GetCore().checkUserId(userId)) {
                 // Проверка корректного userId
                 reply = "Error! Bad userId in request\n";
             } else if (reqType == Requests::Hello) {
                 // Это реквест на приветствие.
                 // Находим имя пользователя по ID и приветствуем его по имени.
-                reply = "Hello, " + GetCore().GetUserName(UserId) + "!\n";
+                reply = "Hello, " + GetCore().GetUserName(userId) + "!\n";
             } else if (reqType == Requests::Balance) {
                 // Это реквест на вывод баланса.
                 // Находим имя пользователя по ID и выводим его баланс.
-                reply = GetCore().GetUserBalance(UserId).toString();
+                reply = GetCore().GetUserBalance(userId).toString();
             } else if (reqType == Requests::Check) {
                 reply = "";
-                for (auto &item: GetCore().alerts[UserId]) {
+                for (auto &item: GetCore().alerts[userId]) {
                     reply += item + ' ';
                 }
                 reply += "Bye!\n";
-                GetCore().alerts[UserId].clear();
+                GetCore().alerts[userId].clear();
             } else if (reqType == Requests::List) {
-                reply = GetCore().GetUserList(UserId);
+                reply = GetCore().GetUserList(userId);
+            } else if (reqType == Requests::Cansel) {
+                int index = std::stoi(static_cast<const std::string &>(j["Index"]));
+                reply = GetCore().Cansel(userId, index);
             } else if (reqType == Requests::Quotes) {
                 reply = "";
                 for (auto item: GetCore().quotes) {
@@ -81,10 +84,11 @@ public:
             } else if (reqType == Requests::AddOrder) {
                 unsigned int quantity = std::stoi(static_cast<const std::string &>(j["Quantity"]));
                 int cost = std::stoi(static_cast<const std::string &>(j["Cost"]));
-                size_t curOrder = GetCore().CreateOrder(UserId, quantity, cost);
                 if (j["OrderType"] == "Sell") {
+                    size_t curOrder = GetCore().CreateOrder(userId, quantity, cost, true);
                     GetCore().AddSell(curOrder);
                 } else {
+                    size_t curOrder = GetCore().CreateOrder(userId, quantity, cost, false);
                     GetCore().AddPurchase(curOrder);
                 }
                 reply = "Ok!\n";

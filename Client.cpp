@@ -17,7 +17,7 @@ void SendMessage(
         const std::string &aRequestType,
         std::map<std::string, std::string> aMessage = {}) {
     nlohmann::json req;
-    req["UserId"] = aId;
+    req["userId"] = aId;
     req["ReqType"] = aRequestType;
     for (auto &item: aMessage) {
         req[item.first] = item.second;
@@ -126,8 +126,9 @@ int main() {
                          "1) Hello Request\n"
                          "2) Balance\n"
                          "3) Add Order\n"
-                         "4) Quotes\n"
-                         "5) Exit\n"
+                         "4) Cancel Order\n"
+                         "5) Quotes\n"
+                         "6) Exit\n"
                       << std::endl;
             
             std::cin >> menuIndex;
@@ -174,12 +175,29 @@ int main() {
                     break;
                 }
                 case 4: {
+                    std::cout << "Your current orders\n";
+                    {
+                        const std::lock_guard<std::mutex> lock(mutex);
+                        SendMessage(s, my_id, Requests::List);
+                        std::cout << ReadMessage(s);
+                    }
+                    int n;
+                    std::cout << "Enter the index of order, that you want to cansel.\n";
+                    std::cin >> n;
+                    {
+                        const std::lock_guard<std::mutex> lock(mutex);
+                        SendMessage(s, my_id, Requests::Cansel, {{"Index", std::to_string(n)}});
+                        std::cout << ReadMessage(s);
+                    }
+                    break;
+                }
+                case 5: {
                     std::cout << "Quotes from the beginning of trading: ";
                     SendMessage(s, my_id, Requests::Quotes);
                     std::cout << ReadMessage(s);
                     break;
                 }
-                case 5: {
+                case 6: {
                     exit(0);
                     break;
                 }
