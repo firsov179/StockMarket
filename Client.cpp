@@ -1,12 +1,14 @@
 #include <iostream>
 #include <map>
-#include <boost/asio.hpp>
 
+#include <boost/asio.hpp>
+#include <thread>
 
 #include "Common.hpp"
 #include "json.hpp"
 
 using boost::asio::ip::tcp;
+std::mutex mutex;
 
 // Отправка сообщения на сервер по шаблону.
 void SendMessage(
@@ -42,14 +44,39 @@ std::string ProcessRegistration(tcp::socket &aSocket, std::string type) {
     std::cout << "Enter your password: ";
     std::cin >> password;
     long passwordHash = std::hash<std::string>{}(password);
-    SendMessage(aSocket, "0", type, {{"Name",         name},
-                                                       {"PasswordHash", std::to_string(passwordHash)}});
-    return ReadMessage(aSocket);
+    {
+        const std::lock_guard<std::mutex> lock(mutex);
+        SendMessage(aSocket, "0", type, {{"Name",         name},
+                                         {"PasswordHash", std::to_string(passwordHash)}});
+        return ReadMessage(aSocket);
+    }
 }
+
+void alertsListener(std::string my_id) {
+    boost::asio::io_service io_service_listener;
+    tcp::resolver resolver_listener(io_service_listener);
+    tcp::resolver::query query_listener(tcp::v4(), "127.0.0.1", std::to_string(port));
+    tcp::resolver::iterator iterator_listener = resolver_listener.resolve(query_listener);
+
+    tcp::socket s_listener(io_service_listener);
+    s_listener.connect(*iterator_listener);
+    while (true) {
+        {
+            const std::lock_guard<std::mutex> lock(mutex);
+            SendMessage(s_listener, my_id, Requests::Check);
+            auto x =  ReadMessage(s_listener);
+            if (x != "Bye!\n") {
+                std::cout << x;
+            }
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    }
+}
+
 
 int main() {
     try {
-        boost::asio::io_service io_service;
+        boost::asio::io_service io_service, io_service_listener;
 
         tcp::resolver resolver(io_service);
         tcp::resolver::query query(tcp::v4(), "127.0.0.1", std::to_string(port));
@@ -64,9 +91,9 @@ int main() {
                      "3) Exit\n"
                   << std::endl;
 
-        short menu_option_num;
-        std::cin >> menu_option_num;
-        switch (menu_option_num) {
+        short menuIndex;
+        std::cin >> menuIndex;
+        switch (menuIndex) {
             case 1: {
                 my_id = ProcessRegistration(s, Requests::Registration);
                 while (my_id == "0") {
@@ -91,7 +118,8 @@ int main() {
                 std::cout << "Unknown menu option\n" << std::endl;
             }
         }
-
+        std::thread thread(alertsListener, my_id);
+        //thread.join();
         while (true) {
             // Тут реализовано "бесконечное" меню.
             std::cout << "Menu:\n"
@@ -101,22 +129,27 @@ int main() {
                          "4) Quotes\n"
                          "5) Exit\n"
                       << std::endl;
-
-            short menu_option_num;
-            std::cin >> menu_option_num;
-            switch (menu_option_num) {
+            
+            std::cin >> menuIndex;
+            switch (menuIndex) {
                 case 1: {
                     // Этот метод получает от сервера приветствие с именем клиента,
                     // отправляя серверу id, полученный при регистрации.
-                    SendMessage(s, my_id, Requests::Hello);
-                    std::cout << ReadMessage(s);
+                    {
+                        const std::lock_guard<std::mutex> lock(mutex);
+                        SendMessage(s, my_id, Requests::Hello);
+                        std::cout << ReadMessage(s);
+                    }
                     break;
                 }
                 case 2: {
                     // Этот метод получает от сервера информацию о балансе клиента,
                     // отправляя серверу id, полученный при регистрации.
-                    SendMessage(s, my_id, Requests::Balance);
-                    std::cout << ReadMessage(s);
+                    {
+                        const std::lock_guard<std::mutex> lock(mutex);
+                        SendMessage(s, my_id, Requests::Balance);
+                        std::cout << ReadMessage(s);
+                    }
                     break;
                 }
                 case 3: {
@@ -129,12 +162,15 @@ int main() {
                     std::cout << "Do you want sell the USD: (Enter Y or y to sell, other to Buy)";
                     char buffer;
                     std::cin >> buffer;
-                    SendMessage(s, my_id, Requests::AddOrder, {
-                            {"Quantity",  std::to_string(quantity)},
-                            {"Cost",      std::to_string(cost)},
-                            {"OrderType", ((buffer == 'y' || buffer == 'Y') ? "Sell" : "Buy")}
-                    });
-                    std::cout << ReadMessage(s);
+                    {
+                        const std::lock_guard<std::mutex> lock(mutex);
+                        SendMessage(s, my_id, Requests::AddOrder, {
+                                {"Quantity",  std::to_string(quantity)},
+                                {"Cost",      std::to_string(cost)},
+                                {"OrderType", ((buffer == 'y' || buffer == 'Y') ? "Sell" : "Buy")}
+                        });
+                        std::cout << ReadMessage(s);
+                    }
                     break;
                 }
                 case 4: {

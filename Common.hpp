@@ -13,6 +13,8 @@ namespace Requests
     static std::string Balance = "Bal";
     static std::string AddOrder = "Add";
     static std::string Quotes = "Quo";
+    static std::string Check = "Che";
+    static std::string List = "Lis";
 }
 
 #endif //CLIENSERVERECN_COMMON_HPP

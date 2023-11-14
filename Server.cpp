@@ -1,4 +1,3 @@
-#include <cstdlib>
 #include <iostream>
 #include <boost/bind/bind.hpp>
 #include <boost/asio.hpp>
@@ -64,16 +63,25 @@ public:
                 // Это реквест на вывод баланса.
                 // Находим имя пользователя по ID и выводим его баланс.
                 reply = GetCore().GetUserBalance(UserId).toString();
-            }else if (reqType == Requests::Quotes) {
+            } else if (reqType == Requests::Check) {
                 reply = "";
-                for (auto item : GetCore().quotes) {
+                for (auto &item: GetCore().alerts[UserId]) {
+                    reply += item + ' ';
+                }
+                reply += "Bye!\n";
+                GetCore().alerts[UserId].clear();
+            } else if (reqType == Requests::List) {
+                reply = GetCore().GetUserList(UserId);
+            } else if (reqType == Requests::Quotes) {
+                reply = "";
+                for (auto item: GetCore().quotes) {
                     reply += " " + std::to_string(item);
                 }
                 reply += "\n";
             } else if (reqType == Requests::AddOrder) {
                 unsigned int quantity = std::stoi(static_cast<const std::string &>(j["Quantity"]));
                 int cost = std::stoi(static_cast<const std::string &>(j["Cost"]));
-                Order curOrder(UserId, quantity, cost);
+                size_t curOrder = GetCore().CreateOrder(UserId, quantity, cost);
                 if (j["OrderType"] == "Sell") {
                     GetCore().AddSell(curOrder);
                 } else {
@@ -140,6 +148,8 @@ private:
     boost::asio::io_service &io_service_;
     tcp::acceptor acceptor_;
 };
+
+std::vector<Order> Core::orders = {};
 
 int main() {
     try {

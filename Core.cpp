@@ -1,13 +1,13 @@
 #include <memory>
 #include "Core.h"
 
-
-unsigned long Core::RegisterNewUser(const std::string &aUserName, long &aUserPasswordHash) {
+unsigned long Core::RegisterNewUser(const std::string &aUserName, long aUserPasswordHash) {
     if (allUsers.find(aUserName) != allUsers.end()) {
         return 0;
     }
     unsigned long newUserId = mUsers.size() + 1;
     allUsers[aUserName] = newUserId;
+    alerts[newUserId] = {};
     mUsers[newUserId] = {aUserName, aUserPasswordHash};
     mUserBalance[newUserId] = Balance();
     return newUserId;
@@ -25,7 +25,7 @@ unsigned long Core::LoginUser(const std::string &aUserName, long aUserPasswordHa
 }
 
 std::string Core::GetUserName(const unsigned long aUserId) {
-    const auto& userIt = mUsers.find(aUserId);
+    const auto &userIt = mUsers.find(aUserId);
     return userIt->second.first;
 }
 
@@ -43,76 +43,82 @@ bool Core::checkUserId(unsigned long aUserId) {
     }
 }
 
-void Core::AddSell(Order sellOrder) {
-    if (mPurchasesOrder.empty() || sellOrder.cost > mPurchasesOrder.begin()->cost) {
+void Core::AddSell(size_t sellOrder) {
+    if (mPurchasesOrder.empty() || orders[sellOrder].cost > orders[*mPurchasesOrder.begin()].cost) {
         mSalesOrder.insert(sellOrder);
         return;
     }
-    while (!mPurchasesOrder.empty() && sellOrder.quantity != 0 && mPurchasesOrder.begin()->cost >= sellOrder.cost) {
-        if (sellOrder.quantity < mPurchasesOrder.begin()->quantity) {
-            Order updated(*mPurchasesOrder.begin());
-            updated.quantity -= sellOrder.quantity;
+    while (!mPurchasesOrder.empty() && orders[sellOrder].quantity != 0 &&
+           orders[*mPurchasesOrder.begin()].cost >= orders[sellOrder].cost) {
+        if (orders[sellOrder].quantity < orders[*mPurchasesOrder.begin()].quantity) {
+            Order updated(orders[*mPurchasesOrder.begin()]);
+            updated.quantity -= orders[sellOrder].quantity;
 
-            transaction(sellOrder.userId, updated.userId, updated.cost,
-                          sellOrder.quantity);
+            transaction(orders[sellOrder].userId, updated.userId, updated.cost,
+                        orders[sellOrder].quantity);
 
-            sellOrder.quantity = 0;
-            mPurchasesOrder.erase(mPurchasesOrder.begin());
-            mPurchasesOrder.insert(updated);
+            orders[sellOrder].quantity = 0;
+            orders.push_back(updated);
+            mSalesOrder.erase(mPurchasesOrder.begin());
+            mPurchasesOrder.insert(orders.size() - 1);
+
         } else {
-            transaction(sellOrder.userId, mPurchasesOrder.begin()->userId,
-                          mPurchasesOrder.begin()->cost, mPurchasesOrder.begin()->quantity);
+            transaction(orders[sellOrder].userId, orders[*mPurchasesOrder.begin()].userId,
+                        orders[*mPurchasesOrder.begin()].cost, orders[*mPurchasesOrder.begin()].quantity);
 
-            sellOrder.quantity -= mPurchasesOrder.begin()->quantity;
+            orders[sellOrder].quantity -= orders[*mPurchasesOrder.begin()].quantity;
             mPurchasesOrder.erase(mPurchasesOrder.begin());
         }
     }
-    if (sellOrder.quantity != 0) {
+    if (orders[sellOrder].quantity != 0) {
         mSalesOrder.insert(sellOrder);
     }
 }
 
-void Core::AddPurchase(Order purchOrder) {
-    if (mSalesOrder.empty() || purchOrder.cost < mSalesOrder.begin()->cost) {
+void Core::AddPurchase(size_t purchOrder) {
+    if (mSalesOrder.empty() || orders[purchOrder].cost < orders[*mSalesOrder.begin()].cost) {
         mPurchasesOrder.insert(purchOrder);
         return;
     }
-    while (!mPurchasesOrder.empty() && purchOrder.quantity != 0 && mSalesOrder.begin()->cost <= purchOrder.cost) {
-        if (purchOrder.quantity < mSalesOrder.begin()->quantity) {
-            Order updated(*mSalesOrder.begin());
-            updated.quantity -= purchOrder.quantity;
+    while (!mPurchasesOrder.empty() && orders[purchOrder].quantity != 0 &&
+           orders[*mSalesOrder.begin()].cost <= orders[purchOrder].cost) {
+        if (orders[purchOrder].quantity < orders[*mSalesOrder.begin()].quantity) {
+            Order updated(orders[*mSalesOrder.begin()]);
+            updated.quantity -= orders[purchOrder].quantity;
 
-            transaction(updated.userId, purchOrder.userId, purchOrder.cost, purchOrder.quantity);
+            transaction(updated.userId, orders[purchOrder].userId, orders[purchOrder].cost,
+                        orders[purchOrder].quantity);
 
-            purchOrder.quantity = 0;
+            orders[purchOrder].quantity = 0;
+            orders.push_back(updated);
             mSalesOrder.erase(mSalesOrder.begin());
-            mSalesOrder.insert(updated);
+            mSalesOrder.insert(orders.size() - 1);
         } else {
-            transaction(mSalesOrder.begin()->userId, purchOrder.userId,
-                          purchOrder.cost, mSalesOrder.begin()->quantity);
+            transaction(orders[*mSalesOrder.begin()].userId, orders[purchOrder].userId,
+                        orders[purchOrder].cost, orders[*mSalesOrder.begin()].quantity);
 
-            purchOrder.quantity -= mSalesOrder.begin()->quantity;
+            orders[purchOrder].quantity -= orders[*mSalesOrder.begin()].quantity;
             mSalesOrder.erase(mSalesOrder.begin());
         }
     }
-    if (purchOrder.quantity != 0) {
+    if (orders[purchOrder].quantity != 0) {
         mPurchasesOrder.insert(purchOrder);
     }
 }
 
-bool sellCmp::operator()(const Order &a, const Order &b) const {
-    if (a.cost != b.cost) {
-        return a.cost < b.cost;
+bool Core::sellCmp::operator()(const size_t a, const size_t b) const {
+    if (orders[a].cost != orders[b].cost) {
+        return orders[a].cost < orders[b].cost;
     }
-    return a.creationTime < b.creationTime;
+    return orders[a].creationTime < orders[b].creationTime;
 }
 
 
-bool purchCmp::operator()(const Order &a, const Order &b) const {
-    if (a.cost != b.cost) {
-        return a.cost > b.cost;
+bool Core::purchCmp::operator()(const size_t a, const size_t b) const {
+    if (orders[a].cost != orders[b].cost) {
+        return orders[a].cost > orders[b].cost;
     }
-    return a.creationTime < b.creationTime;
+    return orders[a].creationTime < orders[b].creationTime;
 }
 
 void Core::transaction(unsigned long sellerId, unsigned long buyerId, int curCost, unsigned int curQuantity) {
@@ -122,5 +128,22 @@ void Core::transaction(unsigned long sellerId, unsigned long buyerId, int curCos
     mUserBalance[buyerId].rub -= deltaRub;
     mUserBalance[buyerId].usd += curQuantity;
     quotes.push_back(curCost);
+    alerts[sellerId].push_back((boost::format(
+            "Your application for the sale of %1% USD is executed at a price of %2% rubles per dollar.\n") %
+                                curQuantity % curCost).str());
+    alerts[buyerId].push_back((boost::format(
+            "Your application for the purchase of %1% USD is executed at a price of %2% rubles per dollar.\n") %
+                               curQuantity % curCost).str());
+}
+
+std::string Core::GetUserList(unsigned long i) {
+    return "";
+}
+
+size_t Core::CreateOrder(unsigned long UserId, unsigned int quantity, int cost) {
+    Order curOrder(UserId, quantity, cost);
+    size_t orderIndex = orders.size();
+    orders.push_back(curOrder);
+    return orderIndex;
 }
 

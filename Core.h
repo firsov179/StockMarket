@@ -9,19 +9,15 @@
 #include "Balance.h"
 #include "Order.h"
 
-struct sellCmp {
-    bool operator()(const Order &a, const Order &b) const;
-};
-
-struct purchCmp {
-    bool operator()(const Order &a, const Order &b) const;
-};
-
 
 class Core {
 public:
+
+    Core() {
+        orders = {};
+    }
     // "Регистрирует" нового пользователя и возвращает его ID.
-    unsigned long RegisterNewUser(const std::string &aUserName, long &aUserPasswordHash);
+    unsigned long RegisterNewUser(const std::string &aUserName, long aUserPasswordHash);
 
     unsigned long LoginUser(const std::string &aUserName, long aUserPasswordHash);
 
@@ -32,25 +28,39 @@ public:
 
     Balance GetUserBalance(unsigned long aUserId);
 
-    void AddSell(Order sellOrder);
+    void AddSell(size_t sellOrder);
 
-    void AddPurchase(Order purchOrder);
+    void AddPurchase(size_t purchOrder);
 
     std::vector<int> quotes;
+    std::unordered_map<unsigned long, std::vector<std::string>> alerts;
+
+    std::string GetUserList(unsigned long i);
+
+    size_t CreateOrder(unsigned long UserId, unsigned int quantity, int cost);
+    static std::vector<Order> orders;
 private:
+    struct sellCmp {
+        bool operator()(const size_t a, const size_t b) const;
+    };
+
+    struct purchCmp {
+        bool operator()(const size_t a, const size_t b) const;
+    };
+
     // <UserId, <UserName, password hash>>
     std::unordered_map<unsigned long, std::pair<std::string, long>> mUsers;
     // <UserName, UserId>
     std::unordered_map<std::string, unsigned long> allUsers;
 
     // <UserId, <USD, RUB>>
-    std::map<unsigned long, Balance> mUserBalance;
+    std::unordered_map<unsigned long, Balance> mUserBalance;
 
     void transaction(unsigned long sellerId, unsigned long buyerId,
                        int curCost, unsigned int curQuantity);
 
-    std::set<Order, sellCmp> mSalesOrder;
-    std::set<Order, purchCmp> mPurchasesOrder;
+    std::set<size_t, sellCmp> mSalesOrder;
+    std::set<size_t, purchCmp> mPurchasesOrder;
 
     FRIEND_TEST(AddPurchase, simple);
     FRIEND_TEST(AddPurchase, Transaction);
