@@ -13,11 +13,11 @@ void SendMessage(
         tcp::socket &aSocket,
         const std::string &aId,
         const std::string &aRequestType,
-        std::map<std::string, std::string> aMessage={}) {
+        std::map<std::string, std::string> aMessage = {}) {
     nlohmann::json req;
     req["UserId"] = aId;
     req["ReqType"] = aRequestType;
-    for ( auto& item: aMessage) {
+    for (auto &item: aMessage) {
         req[item.first] = item.second;
     }
 
@@ -35,13 +35,15 @@ std::string ReadMessage(tcp::socket &aSocket) {
 }
 
 // "Создаём" пользователя, получаем его ID.
-std::string ProcessRegistration(tcp::socket &aSocket) {
-    std::string name;
-    std::cout << "Hello! Enter your name: ";
+std::string ProcessRegistration(tcp::socket &aSocket, std::string type) {
+    std::string name, password;
+    std::cout << "Enter your name: ";
     std::cin >> name;
-
-    // Для регистрации Id не нужен, заполним его нулём
-    SendMessage(aSocket, "0", Requests::Registration, {{"Name", name}});
+    std::cout << "Enter your password: ";
+    std::cin >> password;
+    long passwordHash = std::hash<std::string>{}(password);
+    SendMessage(aSocket, "0", type, {{"Name",         name},
+                                                       {"PasswordHash", std::to_string(passwordHash)}});
     return ReadMessage(aSocket);
 }
 
@@ -55,11 +57,40 @@ int main() {
 
         tcp::socket s(io_service);
         s.connect(*iterator);
+        std::string my_id;
+        std::cout << "Loggin Menu:\n"
+                     "1) Registration\n"
+                     "2) Login\n"
+                     "3) Exit\n"
+                  << std::endl;
 
-        // Мы предполагаем, что для идентификации пользователя будет использоваться ID.
-        // Тут мы "регистрируем" пользователя - отправляем на сервер имя, а сервер возвращает нам ID.
-        // Этот ID далее используется при отправке запросов.
-        std::string my_id = ProcessRegistration(s);
+        short menu_option_num;
+        std::cin >> menu_option_num;
+        switch (menu_option_num) {
+            case 1: {
+                my_id = ProcessRegistration(s, Requests::Registration);
+                while (my_id == "0") {
+                    std::cout << "This name has already been chosen by someone. Please, choose something else.\n";
+                    my_id = ProcessRegistration(s, Requests::Registration);
+                }
+                break;
+            }
+            case 2: {
+                my_id = ProcessRegistration(s, Requests::Login);
+                while (my_id == "0") {
+                    std::cout << "Invalid username or password.\n";
+                    my_id = ProcessRegistration(s, Requests::Login);
+                }
+                break;
+            }
+            case 3: {
+                exit(0);
+                break;
+            }
+            default: {
+                std::cout << "Unknown menu option\n" << std::endl;
+            }
+        }
 
         while (true) {
             // Тут реализовано "бесконечное" меню.
@@ -99,8 +130,8 @@ int main() {
                     char buffer;
                     std::cin >> buffer;
                     SendMessage(s, my_id, Requests::AddOrder, {
-                            {"Quantity", std::to_string(quantity)},
-                            {"Cost", std::to_string(cost)},
+                            {"Quantity",  std::to_string(quantity)},
+                            {"Cost",      std::to_string(cost)},
                             {"OrderType", ((buffer == 'y' || buffer == 'Y') ? "Sell" : "Buy")}
                     });
                     std::cout << ReadMessage(s);

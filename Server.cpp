@@ -48,7 +48,11 @@ public:
             if (reqType == Requests::Registration) {
                 // Это реквест на регистрацию пользователя.
                 // Добавляем нового пользователя и возвращаем его ID.
-                reply = std::to_string(GetCore().RegisterNewUser(j["Name"]));
+                long passwordHash = std::stol(static_cast<const std::string &>(j["PasswordHash"]));
+                reply = std::to_string(GetCore().RegisterNewUser(j["Name"], passwordHash));
+            } else if (reqType == Requests::Login) {
+                long passwordHash = std::stol(static_cast<const std::string &>(j["PasswordHash"]));
+                reply = std::to_string(GetCore().LoginUser(j["Name"], passwordHash));
             } else if (!GetCore().checkUserId(UserId)) {
                 // Проверка корректного userId
                 reply = "Error! Bad userId in request\n";

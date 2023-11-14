@@ -21,7 +21,9 @@ struct purchCmp {
 class Core {
 public:
     // "Регистрирует" нового пользователя и возвращает его ID.
-    const unsigned long RegisterNewUser(const std::string &aUserName);
+    unsigned long RegisterNewUser(const std::string &aUserName, long &aUserPasswordHash);
+
+    unsigned long LoginUser(const std::string &aUserName, long aUserPasswordHash);
 
     // Запрос имени клиента по ID
     std::string GetUserName(unsigned long aUserId);
@@ -36,8 +38,11 @@ public:
 
     std::vector<int> quotes;
 private:
-    // <UserId, UserName>
-    std::unordered_map<unsigned long, std::string> mUsers;
+    // <UserId, <UserName, password hash>>
+    std::unordered_map<unsigned long, std::pair<std::string, long>> mUsers;
+    // <UserName, UserId>
+    std::unordered_map<std::string, unsigned long> allUsers;
+
     // <UserId, <USD, RUB>>
     std::map<unsigned long, Balance> mUserBalance;
 

@@ -2,16 +2,31 @@
 #include "Core.h"
 
 
-const unsigned long Core::RegisterNewUser(const std::string &aUserName) {
-    unsigned long newUserId = mUsers.size();
-    mUsers[newUserId] = aUserName;
+unsigned long Core::RegisterNewUser(const std::string &aUserName, long &aUserPasswordHash) {
+    if (allUsers.find(aUserName) != allUsers.end()) {
+        return 0;
+    }
+    unsigned long newUserId = mUsers.size() + 1;
+    allUsers[aUserName] = newUserId;
+    mUsers[newUserId] = {aUserName, aUserPasswordHash};
     mUserBalance[newUserId] = Balance();
     return newUserId;
 }
 
+unsigned long Core::LoginUser(const std::string &aUserName, long aUserPasswordHash) {
+    auto it = allUsers.find(aUserName);
+    if (it == allUsers.end()) {
+        return 0;
+    }
+    if (mUsers[it->second].second != aUserPasswordHash) {
+        return 0;
+    }
+    return it->second;
+}
+
 std::string Core::GetUserName(const unsigned long aUserId) {
-    const auto userIt = mUsers.find(aUserId);
-    return userIt->second;
+    const auto& userIt = mUsers.find(aUserId);
+    return userIt->second.first;
 }
 
 Balance Core::GetUserBalance(const unsigned long aUserId) {
