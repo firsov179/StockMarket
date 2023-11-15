@@ -52,15 +52,27 @@ void Core::AddSell(size_t sellOrder) {
     while (!mPurchasesOrder.empty() && orders[sellOrder].quantity != 0 &&
            orders[*mPurchasesOrder.begin()].cost >= orders[sellOrder].cost) {
         if (orders[sellOrder].quantity < orders[*mPurchasesOrder.begin()].quantity) {
+            // В этой заявке меньше quantity, чем готовы продать.
             orders[*mPurchasesOrder.begin()].quantity -= orders[sellOrder].quantity;
 
             transaction(orders[sellOrder].userId, orders[*mPurchasesOrder.begin()].userId,
-                        orders[*mPurchasesOrder.begin()].cost,orders[sellOrder].quantity);
+                        orders[*mPurchasesOrder.begin()].cost, orders[sellOrder].quantity);
+
+            auto ind = CreateOrder(orders[*mPurchasesOrder.begin()].userId, orders[sellOrder].quantity,
+                        orders[*mPurchasesOrder.begin()].cost, orders[*mPurchasesOrder.begin()].isSell);
+            orders[ind].quantity = 0;
 
             orders[sellOrder].quantity = 0;
         } else {
+            // В этой заявке больше quantity, чем готовы продать.
+
             transaction(orders[sellOrder].userId, orders[*mPurchasesOrder.begin()].userId,
                         orders[*mPurchasesOrder.begin()].cost, orders[*mPurchasesOrder.begin()].quantity);
+
+            auto ind = CreateOrder(orders[sellOrder].userId, orders[*mPurchasesOrder.begin()].quantity,
+                                   orders[*mPurchasesOrder.begin()].cost, orders[sellOrder].isSell);
+            orders[ind].quantity = 0;
+
             orders[sellOrder].quantity -= orders[*mPurchasesOrder.begin()].quantity;
             orders[*mPurchasesOrder.begin()].quantity = 0;
             mPurchasesOrder.erase(mPurchasesOrder.begin());
@@ -79,16 +91,26 @@ void Core::AddPurchase(size_t purchOrder) {
     while (!mSalesOrder.empty() && orders[purchOrder].quantity != 0 &&
            orders[*mSalesOrder.begin()].cost <= orders[purchOrder].cost) {
         if (orders[purchOrder].quantity < orders[*mSalesOrder.begin()].quantity) {
-
+            // В этой заявке меньше quantity, чем готовы продать.
             orders[*mSalesOrder.begin()].quantity -= orders[purchOrder].quantity;
 
             transaction(orders[*mSalesOrder.begin()].userId, orders[purchOrder].userId, orders[purchOrder].cost,
                         orders[purchOrder].quantity);
 
+            auto ind = CreateOrder(orders[*mSalesOrder.begin()].userId, orders[purchOrder].quantity,
+                                   orders[*mSalesOrder.begin()].cost, orders[*mSalesOrder.begin()].isSell);
+            orders[ind].quantity = 0;
+
             orders[purchOrder].quantity = 0;
         } else {
+            // В этой заявке больше quantity, чем готовы купить.
             transaction(orders[*mSalesOrder.begin()].userId, orders[purchOrder].userId,
                         orders[purchOrder].cost, orders[*mSalesOrder.begin()].quantity);
+
+            auto ind = CreateOrder(orders[purchOrder].userId, orders[*mSalesOrder.begin()].quantity,
+                                   orders[*mSalesOrder.begin()].cost, orders[purchOrder].isSell);
+            orders[ind].quantity = 0;
+
             orders[purchOrder].quantity -= orders[*mSalesOrder.begin()].quantity;
             orders[*mSalesOrder.begin()].quantity = 0;
             mSalesOrder.erase(mSalesOrder.begin());
@@ -135,7 +157,7 @@ std::string Core::GetActualList(unsigned long userId) {
     for (auto orderId: usersOrders[userId]) {
         if (orders[orderId].quantity != 0) {
             res += std::to_string(i) + ". ";
-            res += orders[orderId].toStringActual();
+            res += orders[orderId].toString();
             i++;
         }
     }
@@ -151,7 +173,7 @@ std::string Core::GetClosedList(unsigned long userId) {
     for (auto orderId: usersOrders[userId]) {
         if (orders[orderId].quantity == 0 && orders[orderId].startQuantity != 0) {
             res += std::to_string(i) + ". ";
-            res += orders[orderId].toStringClosed();
+            res += orders[orderId].toString();
             i++;
         }
     }

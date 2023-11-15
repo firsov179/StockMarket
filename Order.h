@@ -5,13 +5,10 @@
 #include <string>
 
 struct Order {
-    unsigned long userId;
-    unsigned int quantity;
-    unsigned int startQuantity;
-    int cost;
-    std::time_t creationTime;
-    bool isSell;
-
+    // Вся информация об одной заявке.
+    /*!
+     * Конструктор заполняющий все поля.
+     */
     Order(unsigned long userId_, unsigned int quantity_, int cost_, bool isSell_) {
         userId = userId_;
         quantity = quantity_;
@@ -21,12 +18,25 @@ struct Order {
         isSell = isSell_;
     }
 
-    std::string toStringActual() {
+    /*!
+     * @return Текстовая информация о заявке.
+     */
+    std::string toString() {
         std::string res = isSell ? "Sell: " : "Purchase: ";
+        if (quantity == 0) {
+            // Совершенная сделка
+            res += "It's closed. ";
+            return res + (boost::format("Quantity: %1%, Cost: %2%, Creation time: %3%") % startQuantity % cost % std::asctime(std::localtime(&creationTime))).str();
+        }
+        // Актуальная заявка
+        res += "It's actual. ";
         return res + (boost::format("Quantity: %1%, Cost: %2%, Creation time: %3%") % quantity % cost % std::asctime(std::localtime(&creationTime))).str();
     }
-    std::string toStringClosed() {
-        std::string res = isSell ? "Sell: " : "Purchase: ";
-        return res + (boost::format("Quantity: %1%, Cost: %2%, Creation time: %3%") % startQuantity % cost % std::asctime(std::localtime(&creationTime))).str();
-    }
+
+    unsigned long userId;
+    unsigned int quantity;
+    unsigned int startQuantity;
+    int cost;
+    std::time_t creationTime;
+    bool isSell;
 };

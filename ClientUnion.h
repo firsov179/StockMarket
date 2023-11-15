@@ -14,24 +14,29 @@ using boost::asio::ip::tcp;
 
 struct Global {
 
-    // Отправка сообщения на сервер по шаблону.
+    /*!
+     * Отправка сообщения на сервер по шаблону.
+     * @param aRequestType Тип запроса из Requests::.
+     * @param aMessage Дополнительные сообщения в виде словаря.
+     */
     static void SendMessage(
-        tcp::socket &aSocket,
-        const std::string &aId,
         const std::string &aRequestType,
         std::map<std::string, std::string> aMessage = {}) {
         nlohmann::json req;
-        req["userId"] = aId;
+        req["userId"] = Global::my_id;
         req["ReqType"] = aRequestType;
         for (auto &item: aMessage) {
             req[item.first] = item.second;
         }
 
         std::string request = req.dump();
-        boost::asio::write(aSocket, boost::asio::buffer(request, request.size()));
+        boost::asio::write(Global::s, boost::asio::buffer(request, request.size()));
     }
 
-    // Возвращает строку с ответом сервера на последний запрос.
+    /*!
+     * @param aSocket Сокет для общения с сервером
+     * @return Возвращает строку с ответом сервера на последний запрос.
+     */
     static std::string ReadMessage(tcp::socket &aSocket) {
         boost::asio::streambuf b;
         boost::asio::read_until(aSocket, b, "\0");
@@ -40,19 +45,8 @@ struct Global {
         return line;
     }
 
-    // "Создаём" пользователя, получаем его ID.
-    static std::string ProcessRegistration(tcp::socket &aSocket, std::string name, std::string password, std::string type) {
-        long passwordHash = std::hash<std::string>{}(password);
-        {
-            const std::lock_guard<std::mutex> lock(mutex);
-            SendMessage(aSocket, "0", type, {{"Name",         name},
-                                             {"PasswordHash", std::to_string(passwordHash)}});
-            return ReadMessage(aSocket);
-        }
-    }
 
-
-    static boost::asio::io_service io_service, io_service_listener;
+    static boost::asio::io_service io_service;
 
     static tcp::resolver resolver;
     static tcp::resolver::query query;

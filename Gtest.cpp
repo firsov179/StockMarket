@@ -3,6 +3,7 @@
 #include "Core.h"
 
 TEST(AddPurchase, SimpleAddition) {
+    // Тест на сортировку однотипных запросов.
     static Core core;
     std::vector userId = {core.RegisterNewUser("Alice", 101),
                           core.RegisterNewUser("Bob", 102),
@@ -24,6 +25,7 @@ TEST(AddPurchase, SimpleAddition) {
 }
 
 TEST(AddPurchase, Transaction) {
+    // Тест на правильное заключение сделки.
     static Core core;
     std::vector userId = {core.RegisterNewUser("Alice", 101),
                           core.RegisterNewUser("Bob", 102),
@@ -50,17 +52,18 @@ TEST(AddPurchase, Transaction) {
 }
 
 TEST(AddPurchase, Balance) {
+    // Тест на правильное обновление баланса и котировок.
     static Core core;
     std::vector userId = {core.RegisterNewUser("Alice", 101),
                           core.RegisterNewUser("Bob", 102),
                           core.RegisterNewUser("Sam", 103)};
 
-    auto index = core.CreateOrder(userId[0], 10, 62, false);
-    core.AddPurchase(index);
-    index = core.CreateOrder(userId[1], 20, 63, false);
-    core.AddPurchase(index);
-    index = core.CreateOrder(userId[2], 50, 61, true);
-    core.AddSell(index);
+    auto index1 = core.CreateOrder(userId[0], 10, 62, false);
+    core.AddPurchase(index1);
+    auto index2 = core.CreateOrder(userId[1], 20, 63, false);
+    core.AddPurchase(index2);
+    auto index3 = core.CreateOrder(userId[2], 50, 61, true);
+    core.AddSell(index3);
 
     auto res =core.GetUserBalance(userId[0]);
     ASSERT_EQ(res.toString(), "Your balance: -620 RUB, 10 USD.\n");
@@ -70,9 +73,16 @@ TEST(AddPurchase, Balance) {
     ASSERT_EQ(res.toString(), "Your balance: 1880 RUB, -30 USD.\n");
     auto quotes = core.GetQuotes();
     ASSERT_EQ(quotes, "63 62\n");
+
+    auto lhs = core.GetClosedList(userId[2]);
+    auto rhs = (boost::format("1. Sell: It's closed. Quantity: 20, Cost: 63, Creation time: %1%2. Sell: It's closed. Quantity: 10, Cost: 62, Creation time: %2%")
+           % std::asctime(std::localtime(&core.orders[index1].creationTime))
+           % std::asctime(std::localtime(&core.orders[index2].creationTime))).str();
+    ASSERT_EQ(lhs, rhs);
 }
 
 TEST(AddPurchase, Cansel) {
+    // Тест на правильную отмену заявки и вывод списков активных и завершенных заявок.
     static Core core;
     auto userId = core.RegisterNewUser("Alice", 101);
 
@@ -83,7 +93,7 @@ TEST(AddPurchase, Cansel) {
 
     auto res = core.GetActualList(userId);
 
-    std::string rhs = (boost::format("1. Purchase: Quantity: 1, Cost: 10, Creation time: %1%2. Sell: Quantity: 1, Cost: 100, Creation time: %2%")
+    std::string rhs = (boost::format("1. Purchase: It's actual. Quantity: 1, Cost: 10, Creation time: %1%2. Sell: It's actual. Quantity: 1, Cost: 100, Creation time: %2%")
             % std::asctime(std::localtime(&core.orders[index1].creationTime))
             % std::asctime(std::localtime(&core.orders[index1].creationTime))).str();
     ASSERT_EQ(res, rhs);
@@ -91,9 +101,12 @@ TEST(AddPurchase, Cansel) {
     res = core.Cansel(userId, 1);
     ASSERT_EQ(res, "Ok!\n");
     res = core.GetActualList(userId);
-    rhs = (boost::format("1. Sell: Quantity: 1, Cost: 100, Creation time: %1%")
+    rhs = (boost::format("1. Sell: It's actual. Quantity: 1, Cost: 100, Creation time: %1%")
            % std::asctime(std::localtime(&core.orders[index1].creationTime))).str();
+
     ASSERT_EQ(res, rhs);
+    res = core.GetClosedList(userId);
+    ASSERT_EQ(res, "None\n");
 
 }
 

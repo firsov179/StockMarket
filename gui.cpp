@@ -5,7 +5,7 @@
 #include <QLocale>
 #include <QTranslator>
 
-boost::asio::io_service Global::io_service, Global::io_service_listener;
+boost::asio::io_service Global::io_service;
 tcp::resolver::query Global::query(tcp::v4(), "127.0.0.1", std::to_string(port));
 tcp::resolver Global::resolver(Global::io_service);
 tcp::resolver::iterator Global::iterator = Global::resolver.resolve(Global::query);
@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
         }
     }
     StockMarket w;
-    Global::s.connect(*Global::iterator);
+    Global::s.connect(*Global::iterator); // connect с сервером
     w.show();
     return a.exec();
 }
