@@ -1,0 +1,674 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>StockMarket</class>
+ <widget class="QMainWindow" name="StockMarket">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1600</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>StockMarket</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-image: url(:/back/Component 24.png);</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QWidget" name="main" native="true">
+    <property name="geometry">
+     <rect>
+      <x>810</x>
+      <y>10</y>
+      <width>780</width>
+      <height>580</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-image: url(:/back/back.png);</string>
+    </property>
+    <widget class="QWidget" name="widget" native="true">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>250</width>
+       <height>560</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-image: url(:/back/Component 25.png);</string>
+     </property>
+     <widget class="QPushButton" name="UpdateList">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>525</y>
+        <width>100</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: rgb(222, 221, 218); 
+selection-background-color: rgb(153, 193, 241);</string>
+      </property>
+      <property name="text">
+       <string>Update</string>
+      </property>
+     </widget>
+     <widget class="QListWidget" name="listWidget">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>100</y>
+        <width>230</width>
+        <height>411</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-image: url(:/back/Component 24.png);</string>
+      </property>
+      <property name="wordWrap">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_7">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>20</y>
+        <width>150</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">font: 700 15pt &quot;Umpush&quot;;</string>
+      </property>
+      <property name="text">
+       <string>Your Orders</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="CanselOrder">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>525</y>
+        <width>100</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: rgb(218, 134, 134);
+selection-background-color: rgb(153, 193, 241);</string>
+      </property>
+      <property name="text">
+       <string>Cansel order</string>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="closed">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>50</y>
+        <width>91</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">font: 300 16pt &quot;Ubuntu&quot;;</string>
+      </property>
+      <property name="text">
+       <string>Closed</string>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>20</width>
+        <height>20</height>
+       </size>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="actual">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>50</y>
+        <width>91</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">font: 350 16pt &quot;Ubuntu&quot;;</string>
+      </property>
+      <property name="text">
+       <string>Actual</string>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>16</width>
+        <height>16</height>
+       </size>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="widget_2" native="true">
+     <property name="geometry">
+      <rect>
+       <x>270</x>
+       <y>370</y>
+       <width>500</width>
+       <height>200</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-image: url(:/back/Component 25.png);</string>
+     </property>
+     <widget class="QLabel" name="label_8">
+      <property name="geometry">
+       <rect>
+        <x>175</x>
+        <y>30</y>
+        <width>150</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">font: 700 18pt &quot;Umpush&quot;;</string>
+      </property>
+      <property name="text">
+       <string>Add Order</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="Cost">
+      <property name="geometry">
+       <rect>
+        <x>140</x>
+        <y>70</y>
+        <width>140</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: rgb(222, 221, 218); 
+selection-background-color: rgb(153, 193, 241);</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_9">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>70</y>
+        <width>90</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">font: 350 16pt &quot;Ubuntu&quot;;</string>
+      </property>
+      <property name="text">
+       <string>Cost</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_10">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>110</y>
+        <width>90</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">font: 350 16pt &quot;Ubuntu&quot;;</string>
+      </property>
+      <property name="text">
+       <string>Quantity</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="Quantity">
+      <property name="geometry">
+       <rect>
+        <x>140</x>
+        <y>110</y>
+        <width>140</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: rgb(222, 221, 218); 
+selection-background-color: rgb(153, 193, 241);</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="sell">
+      <property name="geometry">
+       <rect>
+        <x>140</x>
+        <y>140</y>
+        <width>61</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">font: 350 16pt &quot;Ubuntu&quot;;</string>
+      </property>
+      <property name="text">
+       <string>Sell</string>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>16</width>
+        <height>16</height>
+       </size>
+      </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QRadioButton" name="buy">
+      <property name="geometry">
+       <rect>
+        <x>220</x>
+        <y>140</y>
+        <width>60</width>
+        <height>30</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">font: 300 16pt &quot;Ubuntu&quot;;</string>
+      </property>
+      <property name="text">
+       <string>Buy</string>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>20</width>
+        <height>20</height>
+       </size>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="AddOrder">
+      <property name="geometry">
+       <rect>
+        <x>340</x>
+        <y>80</y>
+        <width>100</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: rgb(218, 134, 134);
+selection-background-color: rgb(153, 193, 241);</string>
+      </property>
+      <property name="text">
+       <string>Create Order</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QFrame" name="frame">
+     <property name="geometry">
+      <rect>
+       <x>270</x>
+       <y>80</y>
+       <width>500</width>
+       <height>280</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-image: url(:/back/Component 25.png);</string>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <widget class="QWidget" name="Quotes" native="true">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>480</width>
+        <height>200</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-image: url(:/back/Component 24.png);</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="UpdateQuotes">
+      <property name="geometry">
+       <rect>
+        <x>190</x>
+        <y>240</y>
+        <width>100</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: rgb(222, 221, 218); 
+selection-background-color: rgb(153, 193, 241);</string>
+      </property>
+      <property name="text">
+       <string>Update</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="Balanse" native="true">
+     <property name="geometry">
+      <rect>
+       <x>270</x>
+       <y>10</y>
+       <width>491</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-image: url(:/back/Component 25.png);</string>
+     </property>
+     <widget class="QLabel" name="balance_lable">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>15</y>
+        <width>361</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">font: 700 15pt &quot;Umpush&quot;;</string>
+      </property>
+      <property name="text">
+       <string>Your balance: 0 RUB, 0 USD.</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="UpdateBalance">
+      <property name="geometry">
+       <rect>
+        <x>380</x>
+        <y>10</y>
+        <width>100</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: rgb(222, 221, 218); 
+selection-background-color: rgb(153, 193, 241);</string>
+      </property>
+      <property name="text">
+       <string>Update</string>
+      </property>
+     </widget>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="welcome" native="true">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>780</width>
+      <height>580</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-image: url(:/back/back.png);</string>
+    </property>
+    <widget class="QWidget" name="loginWidget" native="true">
+     <property name="geometry">
+      <rect>
+       <x>240</x>
+       <y>190</y>
+       <width>300</width>
+       <height>200</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-image: url(:/back/Component 25.png);</string>
+     </property>
+     <widget class="QWidget" name="widget_3" native="true">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>280</width>
+        <height>180</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-image: url(:/back/Component 24.png);</string>
+      </property>
+      <widget class="QPushButton" name="ok">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>130</y>
+         <width>100</width>
+         <height>25</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background: rgb(222, 221, 218); 
+selection-background-color: rgb(153, 193, 241);</string>
+       </property>
+       <property name="text">
+        <string>Login</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="close">
+       <property name="geometry">
+        <rect>
+         <x>255</x>
+         <y>0</y>
+         <width>25</width>
+         <height>25</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background: rgb(222, 221, 218); 
+selection-background-color: rgb(153, 193, 241);</string>
+       </property>
+       <property name="text">
+        <string>X</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="login">
+       <property name="geometry">
+        <rect>
+         <x>120</x>
+         <y>50</y>
+         <width>140</width>
+         <height>25</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background: rgb(222, 221, 218); 
+selection-background-color: rgb(153, 193, 241);</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="password">
+       <property name="geometry">
+        <rect>
+         <x>120</x>
+         <y>80</y>
+         <width>140</width>
+         <height>25</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background: rgb(222, 221, 218); 
+selection-background-color: rgb(153, 193, 241);</string>
+       </property>
+       <property name="echoMode">
+        <enum>QLineEdit::Password</enum>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>80</y>
+         <width>70</width>
+         <height>25</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Password</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_2">
+       <property name="geometry">
+        <rect>
+         <x>30</x>
+         <y>50</y>
+         <width>70</width>
+         <height>25</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Login</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="heading">
+       <property name="geometry">
+        <rect>
+         <x>90</x>
+         <y>10</y>
+         <width>100</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">font: 700 italic 11pt &quot;Ubuntu&quot;;
+</string>
+       </property>
+       <property name="text">
+        <string>Registration</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </widget>
+    </widget>
+    <widget class="QPushButton" name="Registration">
+     <property name="geometry">
+      <rect>
+       <x>315</x>
+       <y>200</y>
+       <width>150</width>
+       <height>40</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: rgb(222, 221, 218); 
+selection-background-color: rgb(153, 193, 241);</string>
+     </property>
+     <property name="text">
+      <string>Registration</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="Login">
+     <property name="geometry">
+      <rect>
+       <x>315</x>
+       <y>250</y>
+       <width>150</width>
+       <height>40</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: rgb(222, 221, 218); 
+selection-background-color: rgb(153, 193, 241);</string>
+     </property>
+     <property name="text">
+      <string>Login</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="exit">
+     <property name="geometry">
+      <rect>
+       <x>315</x>
+       <y>300</y>
+       <width>150</width>
+       <height>40</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: rgb(222, 221, 218); 
+selection-background-color: rgb(153, 193, 241);</string>
+     </property>
+     <property name="text">
+      <string>Exit</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_3">
+     <property name="geometry">
+      <rect>
+       <x>230</x>
+       <y>50</y>
+       <width>320</width>
+       <height>50</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">font: 700 30pt &quot;Umpush&quot;;</string>
+     </property>
+     <property name="text">
+      <string>StockMarket</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_4">
+     <property name="geometry">
+      <rect>
+       <x>320</x>
+       <y>90</y>
+       <width>150</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">font: 700 15pt &quot;Umpush&quot;;</string>
+     </property>
+     <property name="text">
+      <string>online exchange</string>
+     </property>
+    </widget>
+    <zorder>exit</zorder>
+    <zorder>Login</zorder>
+    <zorder>Registration</zorder>
+    <zorder>loginWidget</zorder>
+    <zorder>label_3</zorder>
+    <zorder>label_4</zorder>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

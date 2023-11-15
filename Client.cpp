@@ -5,36 +5,11 @@
 #include <thread>
 
 #include "Common.hpp"
-#include "json.hpp"
+#include "ClientUnion.h"
 
 using boost::asio::ip::tcp;
-std::mutex mutex;
-
-// Отправка сообщения на сервер по шаблону.
-void SendMessage(
-        tcp::socket &aSocket,
-        const std::string &aId,
-        const std::string &aRequestType,
-        std::map<std::string, std::string> aMessage = {}) {
-    nlohmann::json req;
-    req["userId"] = aId;
-    req["ReqType"] = aRequestType;
-    for (auto &item: aMessage) {
-        req[item.first] = item.second;
-    }
-
-    std::string request = req.dump();
-    boost::asio::write(aSocket, boost::asio::buffer(request, request.size()));
-}
-
-// Возвращает строку с ответом сервера на последний запрос.
-std::string ReadMessage(tcp::socket &aSocket) {
-    boost::asio::streambuf b;
-    boost::asio::read_until(aSocket, b, "\0");
-    std::istream is(&b);
-    std::string line(std::istreambuf_iterator<char>(is), {});
-    return line;
-}
+std::string Global::my_id = "0";
+std::mutex Global::mutex;
 
 // "Создаём" пользователя, получаем его ID.
 std::string ProcessRegistration(tcp::socket &aSocket, std::string type) {
@@ -43,13 +18,7 @@ std::string ProcessRegistration(tcp::socket &aSocket, std::string type) {
     std::cin >> name;
     std::cout << "Enter your password: ";
     std::cin >> password;
-    long passwordHash = std::hash<std::string>{}(password);
-    {
-        const std::lock_guard<std::mutex> lock(mutex);
-        SendMessage(aSocket, "0", type, {{"Name",         name},
-                                         {"PasswordHash", std::to_string(passwordHash)}});
-        return ReadMessage(aSocket);
-    }
+    return Global::ProcessRegistration(aSocket, type, name, password);
 }
 
 void alertsListener(std::string my_id) {
@@ -62,9 +31,9 @@ void alertsListener(std::string my_id) {
     s_listener.connect(*iterator_listener);
     while (true) {
         {
-            const std::lock_guard<std::mutex> lock(mutex);
-            SendMessage(s_listener, my_id, Requests::Check);
-            auto x =  ReadMessage(s_listener);
+            const std::lock_guard<std::mutex> lock(Global::mutex);
+            Global::SendMessage(s_listener, my_id, Requests::Check);
+            auto x =  Global::ReadMessage(s_listener);
             if (x != "Bye!\n") {
                 std::cout << x;
             }
@@ -119,16 +88,17 @@ int main() {
             }
         }
         std::thread thread(alertsListener, my_id);
-        //thread.join();
         while (true) {
             // Тут реализовано "бесконечное" меню.
             std::cout << "Menu:\n"
-                         "1) Hello Request\n"
+                         "1) Hello request\n"
                          "2) Balance\n"
-                         "3) Add Order\n"
-                         "4) Cancel Order\n"
-                         "5) Quotes\n"
-                         "6) Exit\n"
+                         "3) Add order\n"
+                         "4) List of actual orders\n"
+                         "5) List of closed orders\n"
+                         "6) Cancel order\n"
+                         "7) Quotes\n"
+                         "8) Exit\n"
                       << std::endl;
             
             std::cin >> menuIndex;
@@ -137,9 +107,9 @@ int main() {
                     // Этот метод получает от сервера приветствие с именем клиента,
                     // отправляя серверу id, полученный при регистрации.
                     {
-                        const std::lock_guard<std::mutex> lock(mutex);
-                        SendMessage(s, my_id, Requests::Hello);
-                        std::cout << ReadMessage(s);
+                        const std::lock_guard<std::mutex> lock(Global::mutex);
+                        Global::SendMessage(s, my_id, Requests::Hello);
+                        std::cout << Global::ReadMessage(s);
                     }
                     break;
                 }
@@ -147,9 +117,9 @@ int main() {
                     // Этот метод получает от сервера информацию о балансе клиента,
                     // отправляя серверу id, полученный при регистрации.
                     {
-                        const std::lock_guard<std::mutex> lock(mutex);
-                        SendMessage(s, my_id, Requests::Balance);
-                        std::cout << ReadMessage(s);
+                        const std::lock_guard<std::mutex> lock(Global::mutex);
+                        Global::SendMessage(s, my_id, Requests::Balance);
+                        std::cout << Global::ReadMessage(s);
                     }
                     break;
                 }
@@ -164,40 +134,58 @@ int main() {
                     char buffer;
                     std::cin >> buffer;
                     {
-                        const std::lock_guard<std::mutex> lock(mutex);
-                        SendMessage(s, my_id, Requests::AddOrder, {
+                        const std::lock_guard<std::mutex> lock(Global::mutex);
+                        Global::SendMessage(s, my_id, Requests::AddOrder, {
                                 {"Quantity",  std::to_string(quantity)},
                                 {"Cost",      std::to_string(cost)},
                                 {"OrderType", ((buffer == 'y' || buffer == 'Y') ? "Sell" : "Buy")}
                         });
-                        std::cout << ReadMessage(s);
+                        std::cout << Global::ReadMessage(s);
                     }
                     break;
                 }
                 case 4: {
-                    std::cout << "Your current orders\n";
+                    std::cout << "Your actual orders:\n";
                     {
-                        const std::lock_guard<std::mutex> lock(mutex);
-                        SendMessage(s, my_id, Requests::List);
-                        std::cout << ReadMessage(s);
+                        const std::lock_guard<std::mutex> lock(Global::mutex);
+                        Global::SendMessage(s, my_id, Requests::ListActual);
+                        std::cout << Global::ReadMessage(s);
+                    }
+                    break;
+                }
+                case 5: {
+                    std::cout << "Your closed orders:\n";
+                    {
+                        const std::lock_guard<std::mutex> lock(Global::mutex);
+                        Global::SendMessage(s, my_id, Requests::ListClosed);
+                        std::cout << Global::ReadMessage(s);
+                    }
+                    break;
+                }
+                case 6: {
+                    std::cout << "Your current orders:\n";
+                    {
+                        const std::lock_guard<std::mutex> lock(Global::mutex);
+                        Global::SendMessage(s, my_id, Requests::ListActual);
+                        std::cout << Global::ReadMessage(s);
                     }
                     int n;
                     std::cout << "Enter the index of order, that you want to cansel.\n";
                     std::cin >> n;
                     {
-                        const std::lock_guard<std::mutex> lock(mutex);
-                        SendMessage(s, my_id, Requests::Cansel, {{"Index", std::to_string(n)}});
-                        std::cout << ReadMessage(s);
+                        const std::lock_guard<std::mutex> lock(Global::mutex);
+                        Global::SendMessage(s, my_id, Requests::Cansel, {{"Index", std::to_string(n)}});
+                        std::cout << Global::ReadMessage(s);
                     }
                     break;
                 }
-                case 5: {
+                case 7: {
                     std::cout << "Quotes from the beginning of trading: ";
-                    SendMessage(s, my_id, Requests::Quotes);
-                    std::cout << ReadMessage(s);
+                    Global::SendMessage(s, my_id, Requests::Quotes);
+                    std::cout << Global::ReadMessage(s);
                     break;
                 }
-                case 6: {
+                case 8: {
                     exit(0);
                     break;
                 }

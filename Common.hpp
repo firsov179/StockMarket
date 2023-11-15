@@ -14,7 +14,8 @@ namespace Requests
     static std::string AddOrder = "Add";
     static std::string Quotes = "Quo";
     static std::string Check = "Che";
-    static std::string List = "Lis";
+    static std::string ListActual = "Lis";
+    static std::string ListClosed = "Out";
     static std::string Cansel = "Can";
 }
 

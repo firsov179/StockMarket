@@ -76,7 +76,7 @@ void Core::AddPurchase(size_t purchOrder) {
         mPurchasesOrder.insert(purchOrder);
         return;
     }
-    while (!mPurchasesOrder.empty() && orders[purchOrder].quantity != 0 &&
+    while (!mSalesOrder.empty() && orders[purchOrder].quantity != 0 &&
            orders[*mSalesOrder.begin()].cost <= orders[purchOrder].cost) {
         if (orders[purchOrder].quantity < orders[*mSalesOrder.begin()].quantity) {
 
@@ -129,19 +129,38 @@ void Core::transaction(unsigned long sellerId, unsigned long buyerId, int curCos
                                curQuantity % curCost).str());
 }
 
-std::string Core::GetUserList(unsigned long userId) {
-    std::string res = "{\n";
+std::string Core::GetActualList(unsigned long userId) {
+    std::string res = "";
     int i = 1;
     for (auto orderId: usersOrders[userId]) {
         if (orders[orderId].quantity != 0) {
             res += std::to_string(i) + ". ";
-            res += orders[orderId].toString();
+            res += orders[orderId].toStringActual();
             i++;
         }
     }
-    res += "}\n";
+    if (i == 1) {
+        return "None\n";
+    }
     return res;
 }
+
+std::string Core::GetClosedList(unsigned long userId) {
+    std::string res = "";
+    int i = 1;
+    for (auto orderId: usersOrders[userId]) {
+        if (orders[orderId].quantity == 0 && orders[orderId].startQuantity != 0) {
+            res += std::to_string(i) + ". ";
+            res += orders[orderId].toStringClosed();
+            i++;
+        }
+    }
+    if (i == 1) {
+        return "None\n";
+    }
+    return res;
+}
+
 
 size_t Core::CreateOrder(unsigned long userId, unsigned int quantity, int cost, bool isSale) {
     Order curOrder(userId, quantity, cost, isSale);
@@ -159,6 +178,7 @@ std::string Core::Cansel(unsigned long userId, int index) {
         }
         if (i == index) {
             orders[orderId].quantity = 0;
+            orders[orderId].startQuantity = 0;
             return "Ok!\n";
         }
     }
@@ -172,6 +192,9 @@ std::string Core::GetQuotes() {
             res += ' ';
         }
         res += std::to_string(item);
+    }
+    if (res.empty()) {
+        return "0\n";
     }
     return res + "\n";
 }

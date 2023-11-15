@@ -35,7 +35,7 @@ public:
     std::vector<int> quotes;
     std::unordered_map<unsigned long, std::vector<std::string>> alerts;
 
-    std::string GetUserList(unsigned long i);
+    std::string GetActualList(unsigned long i);
 
     size_t CreateOrder(unsigned long userId, unsigned int quantity, int cost, bool isSale);
     static std::vector<Order> orders;
@@ -43,6 +43,8 @@ public:
     std::string Cansel(unsigned long userId, int index);
 
     std::string GetQuotes();
+
+    std::string GetClosedList(unsigned long userId);
 
 private:
     struct sellCmp {

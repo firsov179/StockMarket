@@ -11,6 +11,6 @@ struct Balance {
     }
 
     std::string toString() {
-        return (boost::format("Balance: %1% RUB, %2% USD.\n") % rub % usd).str();
+        return (boost::format("Your balance: %1% RUB, %2% USD.\n") % rub % usd).str();
     }
 };

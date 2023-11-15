@@ -43,7 +43,6 @@ public:
             unsigned long userId = std::stol(static_cast<const std::string &>(j["userId"]));
 
             std::string reply = "Error! Unknown request typen";
-            std::cout << reqType << std::endl;
             if (reqType == Requests::Registration) {
                 // Это реквест на регистрацию пользователя.
                 // Добавляем нового пользователя и возвращаем его ID.
@@ -70,8 +69,10 @@ public:
                 }
                 reply += "Bye!\n";
                 GetCore().alerts[userId].clear();
-            } else if (reqType == Requests::List) {
-                reply = GetCore().GetUserList(userId);
+            } else if (reqType == Requests::ListActual) {
+                reply = GetCore().GetActualList(userId);
+            } else if (reqType == Requests::ListClosed) {
+                reply = GetCore().GetClosedList(userId);
             } else if (reqType == Requests::Cansel) {
                 int index = std::stoi(static_cast<const std::string &>(j["Index"]));
                 reply = GetCore().Cansel(userId, index);

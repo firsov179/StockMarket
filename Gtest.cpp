@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 
-
 #include "Core.h"
 
 TEST(AddPurchase, SimpleAddition) {
@@ -64,11 +63,11 @@ TEST(AddPurchase, Balance) {
     core.AddSell(index);
 
     auto res =core.GetUserBalance(userId[0]);
-    ASSERT_EQ(res.toString(), "Balance: -620 RUB, 10 USD.\n");
+    ASSERT_EQ(res.toString(), "Your balance: -620 RUB, 10 USD.\n");
     res = core.GetUserBalance(userId[1]);
-    ASSERT_EQ(res.toString(), "Balance: -1260 RUB, 20 USD.\n");
+    ASSERT_EQ(res.toString(), "Your balance: -1260 RUB, 20 USD.\n");
     res = core.GetUserBalance(userId[2]);
-    ASSERT_EQ(res.toString(), "Balance: 1880 RUB, -30 USD.\n");
+    ASSERT_EQ(res.toString(), "Your balance: 1880 RUB, -30 USD.\n");
     auto quotes = core.GetQuotes();
     ASSERT_EQ(quotes, "63 62\n");
 }
@@ -82,17 +81,17 @@ TEST(AddPurchase, Cansel) {
     auto index2 = core.CreateOrder(userId, 1, 100, true);
     core.AddSell(index2);
 
-    auto res = core.GetUserList(userId);
+    auto res = core.GetActualList(userId);
 
-    std::string rhs = (boost::format("{\n1. Purchase: Quantity: 1, Cost: 10, Creation time: %1%2. Sell: Quantity: 1, Cost: 100, Creation time: %2%}\n")
+    std::string rhs = (boost::format("1. Purchase: Quantity: 1, Cost: 10, Creation time: %1%2. Sell: Quantity: 1, Cost: 100, Creation time: %2%")
             % std::asctime(std::localtime(&core.orders[index1].creationTime))
             % std::asctime(std::localtime(&core.orders[index1].creationTime))).str();
     ASSERT_EQ(res, rhs);
 
     res = core.Cansel(userId, 1);
     ASSERT_EQ(res, "Ok!\n");
-    res = core.GetUserList(userId);
-    rhs = (boost::format("{\n1. Sell: Quantity: 1, Cost: 100, Creation time: %1%}\n")
+    res = core.GetActualList(userId);
+    rhs = (boost::format("1. Sell: Quantity: 1, Cost: 100, Creation time: %1%")
            % std::asctime(std::localtime(&core.orders[index1].creationTime))).str();
     ASSERT_EQ(res, rhs);
 
