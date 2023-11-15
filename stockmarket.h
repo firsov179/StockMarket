@@ -40,8 +40,13 @@ private slots:
 
     void alertsListener();
 
+    void on_closed_clicked();
+
+    void on_actual_clicked();
+
 private:
     Ui::StockMarket *ui;
     QTimer *timer;
+
 };
 #endif // STOCKMARKET_H

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1600</width>
+    <width>800</width>
     <height>600</height>
    </rect>
   </property>
@@ -14,20 +14,20 @@
    <string>StockMarket</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-image: url(:/back/Component 24.png);</string>
+   <string notr="true">background-image: url(:/back/img/light.png);</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QWidget" name="main" native="true">
     <property name="geometry">
      <rect>
-      <x>810</x>
+      <x>10</x>
       <y>10</y>
       <width>780</width>
       <height>580</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-image: url(:/back/back.png);</string>
+     <string notr="true">background-image: url(:/back/img/back.png);</string>
     </property>
     <widget class="QWidget" name="widget" native="true">
      <property name="geometry">
@@ -39,7 +39,7 @@
       </rect>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-image: url(:/back/Component 25.png);</string>
+      <string notr="true">background-image: url(:/back/img/blue.png);</string>
      </property>
      <widget class="QPushButton" name="UpdateList">
       <property name="geometry">
@@ -68,7 +68,7 @@ selection-background-color: rgb(153, 193, 241);</string>
        </rect>
       </property>
       <property name="styleSheet">
-       <string notr="true">background-image: url(:/back/Component 24.png);</string>
+       <string notr="true">background-image: url(:/back/img/light.png);</string>
       </property>
       <property name="wordWrap">
        <bool>true</bool>
@@ -168,7 +168,7 @@ selection-background-color: rgb(153, 193, 241);</string>
       </rect>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-image: url(:/back/Component 25.png);</string>
+      <string notr="true">background-image: url(:/back/img/blue.png);</string>
      </property>
      <widget class="QLabel" name="label_8">
       <property name="geometry">
@@ -330,7 +330,7 @@ selection-background-color: rgb(153, 193, 241);</string>
       </rect>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-image: url(:/back/Component 25.png);</string>
+      <string notr="true">background-image: url(:/back/img/blue.png);</string>
      </property>
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
@@ -348,7 +348,7 @@ selection-background-color: rgb(153, 193, 241);</string>
        </rect>
       </property>
       <property name="styleSheet">
-       <string notr="true">background-image: url(:/back/Component 24.png);</string>
+       <string notr="true">background-image: url(:/back/img/light.png);</string>
       </property>
      </widget>
      <widget class="QPushButton" name="UpdateQuotes">
@@ -379,7 +379,7 @@ selection-background-color: rgb(153, 193, 241);</string>
       </rect>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-image: url(:/back/Component 25.png);</string>
+      <string notr="true">background-image: url(:/back/img/blue.png);</string>
      </property>
      <widget class="QLabel" name="balance_lable">
       <property name="geometry">
@@ -429,7 +429,7 @@ selection-background-color: rgb(153, 193, 241);</string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-image: url(:/back/back.png);</string>
+     <string notr="true">background-image: url(:/back/img/back.png);</string>
     </property>
     <widget class="QWidget" name="loginWidget" native="true">
      <property name="geometry">
@@ -441,7 +441,7 @@ selection-background-color: rgb(153, 193, 241);</string>
       </rect>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-image: url(:/back/Component 25.png);</string>
+      <string notr="true">background-image: url(:/back/img/blue.png);</string>
      </property>
      <widget class="QWidget" name="widget_3" native="true">
       <property name="enabled">
@@ -456,7 +456,7 @@ selection-background-color: rgb(153, 193, 241);</string>
        </rect>
       </property>
       <property name="styleSheet">
-       <string notr="true">background-image: url(:/back/Component 24.png);</string>
+       <string notr="true">background-image: url(:/back/img/light.png);</string>
       </property>
       <widget class="QPushButton" name="ok">
        <property name="geometry">
