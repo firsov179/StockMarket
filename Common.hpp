@@ -7,6 +7,7 @@ static short port = 5555;
 
 namespace Requests
 {
+    // Виды запросов
     static std::string Registration = "Reg";
     static std::string Login = "Log";
     static std::string Hello = "Hel";

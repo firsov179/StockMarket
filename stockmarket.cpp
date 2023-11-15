@@ -53,7 +53,7 @@ void StockMarket::on_close_clicked() {
 
 void StockMarket::alertsListener() {
     const std::lock_guard<std::mutex> lock(Global::mutex);
-    Global::SendMessage(Global::s, Global::my_id, Requests::Check);
+    Global::SendMessage(Requests::Check);
     auto x = Global::ReadMessage(Global::s);
     if (x != "Bye!\n") {
         QMessageBox::information(this, "Transaction", x.c_str());
@@ -61,9 +61,12 @@ void StockMarket::alertsListener() {
 }
 
 void StockMarket::on_ok_clicked() {
-    Global::my_id = Global::ProcessRegistration(Global::s,
-                                                ui->login->text().toStdString(), ui->password->text().toStdString(),
-                                                isRegistration ? Requests::Registration : Requests::Login);
+    long passwordHash = std::hash<std::string>{}(ui->password->text().toStdString());
+    Global::SendMessage(isRegistration ? Requests::Registration : Requests::Login, {
+            {"Name",         ui->login->text().toStdString()},
+            {"PasswordHash", std::to_string(passwordHash)}});
+    Global::my_id = Global::ReadMessage(Global::s);
+
     if (Global::my_id == "0") {
         if (isRegistration) {
             QMessageBox::critical(this, "Unable to register",
@@ -76,6 +79,7 @@ void StockMarket::on_ok_clicked() {
         ui->welcome->hide();
         ui->main->show();
         timer->start(333);
+        StockMarket::on_UpdateQuotes_clicked();
     }
 }
 
@@ -97,8 +101,8 @@ std::vector<std::string> split_string(const std::string &str, char c) {
 
 void StockMarket::on_UpdateList_clicked() {
     const std::lock_guard<std::mutex> lock(Global::mutex);
-    Global::SendMessage(Global::s, Global::my_id,
-                        ui->actual->isChecked() ? Requests::ListActual : Requests::ListClosed);
+    Global::SendMessage(
+            ui->actual->isChecked() ? Requests::ListActual : Requests::ListClosed);
     auto list = split_string(Global::ReadMessage(Global::s), '\n');
     ui->listWidget->clear();
     for (std::string &item: list) {
@@ -108,7 +112,7 @@ void StockMarket::on_UpdateList_clicked() {
 
 
 void StockMarket::on_AddOrder_clicked() {
-    Global::SendMessage(Global::s, Global::my_id, Requests::AddOrder, {
+    Global::SendMessage(Requests::AddOrder, {
             {"Quantity",  ui->Quantity->text().toStdString()},
             {"Cost",      ui->Cost->text().toStdString()},
             {"OrderType", (ui->sell->isChecked() ? "Sell" : "Buy")}
@@ -119,16 +123,17 @@ void StockMarket::on_AddOrder_clicked() {
 
 void StockMarket::on_CanselOrder_clicked() {
     const std::lock_guard<std::mutex> lock(Global::mutex);
-    Global::SendMessage(Global::s, Global::my_id, Requests::Cansel,
+    Global::SendMessage(Requests::Cansel,
                         {{"Index", std::to_string(ui->listWidget->currentIndex().row() + 1)}});
-    QMessageBox::information(this, std::to_string(ui->listWidget->currentIndex().row() + 1).c_str(),
-                             Global::ReadMessage(Global::s).c_str());
+
+    auto x = Global::ReadMessage(Global::s);
+    StockMarket::on_UpdateList_clicked();
 }
 
 
 void StockMarket::on_UpdateQuotes_clicked() {
     const std::lock_guard<std::mutex> lock(Global::mutex);
-    Global::SendMessage(Global::s, Global::my_id, Requests::Quotes);
+    Global::SendMessage(Requests::Quotes);
     auto res = split_string(Global::ReadMessage(Global::s), ' ');
 
     QtCharts::QLineSeries *series = new QtCharts::QLineSeries();
@@ -155,7 +160,7 @@ void StockMarket::on_UpdateQuotes_clicked() {
 
 void StockMarket::on_UpdateBalance_clicked() {
     const std::lock_guard<std::mutex> lock(Global::mutex);
-    Global::SendMessage(Global::s, Global::my_id, Requests::Balance);
+    Global::SendMessage(Requests::Balance);
     ui->balance_lable->setText(QString::fromStdString(Global::ReadMessage(Global::s)));
 }
 

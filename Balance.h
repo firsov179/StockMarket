@@ -3,6 +3,7 @@
 #include <boost/format.hpp>
 
 struct Balance {
+    // Почти std::pair, но с удобным названием полей
     long rub, usd;
 
     Balance() {
@@ -11,6 +12,7 @@ struct Balance {
     }
 
     std::string toString() {
+        // Представление в виде строки
         return (boost::format("Your balance: %1% RUB, %2% USD.\n") % rub % usd).str();
     }
 };

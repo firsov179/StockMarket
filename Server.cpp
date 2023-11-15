@@ -37,32 +37,34 @@ public:
         if (!error) {
             data_[bytes_transferred] = '\0';
 
-            // Парсим json, который пришёл нам в сообщении.
             auto j = nlohmann::json::parse(data_);
             auto reqType = j["ReqType"];
             unsigned long userId = std::stol(static_cast<const std::string &>(j["userId"]));
 
             std::string reply = "Error! Unknown request typen";
             if (reqType == Requests::Registration) {
-                // Это реквест на регистрацию пользователя.
+                // Запрос на регистрацию пользователя.
                 // Добавляем нового пользователя и возвращаем его ID.
                 long passwordHash = std::stol(static_cast<const std::string &>(j["PasswordHash"]));
                 reply = std::to_string(GetCore().RegisterNewUser(j["Name"], passwordHash));
             } else if (reqType == Requests::Login) {
+                // Запрос на вход по логину и паролю.
+                // Ищем пользователя и возвращаем его ID.
                 long passwordHash = std::stol(static_cast<const std::string &>(j["PasswordHash"]));
                 reply = std::to_string(GetCore().LoginUser(j["Name"], passwordHash));
             } else if (!GetCore().checkUserId(userId)) {
-                // Проверка корректного userId
+                // Проверка корректности userId.
                 reply = "Error! Bad userId in request\n";
             } else if (reqType == Requests::Hello) {
-                // Это реквест на приветствие.
+                // Это запрос на приветствие.
                 // Находим имя пользователя по ID и приветствуем его по имени.
                 reply = "Hello, " + GetCore().GetUserName(userId) + "!\n";
             } else if (reqType == Requests::Balance) {
-                // Это реквест на вывод баланса.
+                // Это запрос на вывод баланса.
                 // Находим имя пользователя по ID и выводим его баланс.
                 reply = GetCore().GetUserBalance(userId).toString();
             } else if (reqType == Requests::Check) {
+                // Это запрос на проверку необходимости отправки уведомления о совершенной сделке.
                 reply = "";
                 for (auto &item: GetCore().alerts[userId]) {
                     reply += item + ' ';
@@ -70,15 +72,20 @@ public:
                 reply += "Bye!\n";
                 GetCore().alerts[userId].clear();
             } else if (reqType == Requests::ListActual) {
+                // Это запрос на получение списка актуальных заявок.
                 reply = GetCore().GetActualList(userId);
             } else if (reqType == Requests::ListClosed) {
+                // Это запрос на получение списка совершенных сделок.
                 reply = GetCore().GetClosedList(userId);
             } else if (reqType == Requests::Cansel) {
+                // Это запрос на отмену заявки.
                 int index = std::stoi(static_cast<const std::string &>(j["Index"]));
                 reply = GetCore().Cansel(userId, index);
             } else if (reqType == Requests::Quotes) {
+                // Это запрос на получение котировок.
                 reply = GetCore().GetQuotes();
             } else if (reqType == Requests::AddOrder) {
+                // Это запрос на создание заявки.
                 unsigned int quantity = std::stoi(static_cast<const std::string &>(j["Quantity"]));
                 int cost = std::stoi(static_cast<const std::string &>(j["Cost"]));
                 if (j["OrderType"] == "Sell") {
